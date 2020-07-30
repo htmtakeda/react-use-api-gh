@@ -1,26 +1,47 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+
+const App = () => {
+	const [state, setState] = React.useState({
+		zipcode:'',
+		address:''
+	});
+	
+	const handleChange =(e) => {
+		setState({zipcode: e.target.value});
+	}
+
+	const handleSubmit = (e)=> {
+		fetch(`https://api.zipaddress.net/?zipcode=${state.zipcode}`, {
+			mode: 'cors'
+		})
+			.then((response) => {
+				return response.json();
+			})
+			.then((myJson) => {
+				if (myJson.code === 200){
+					setState({...state,address: myJson.data.fullAddress});
+				}else{
+					setState({...state,address: myJson.message});
+				}
+			});
+		e.preventDefault();
+	}
+	
+	return (
+		<div>
+			<p>Enter zip code</p>
+			<form onSubmit={handleSubmit}>
+				<p className="App-intro">
+					<input type="text" value={state.zipcode} onChange={handleChange}/>
+					<input type="submit" value="検索"/>
+				</p>
+			</form>
+			<p>{state.address}</p>
+		</div>
+	);
 }
+
 
 export default App;
